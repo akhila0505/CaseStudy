@@ -1,0 +1,37 @@
+node {
+    stage('Deployment Begins')
+    {
+        echo 'We are Deploying a PLSQL Sub-program into Testing Environment From Development Environment'
+    }
+    
+    stage('SCM Checkout')
+    {
+        echo "Ensuring that the pipeline is configured to clean the Jenkins workspace before checkout"
+		git branch: 'master', changelog: false, poll: false,
+		url: 'https://akhila0505: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@github.com/akhila0505/CaseStudy.git'
+    }
+    
+    stage('Managing Testing Workspace')
+    {
+        bat 'IF exist "C:\\Jenkins\\Home\\workspace\\Oracle_CaseStudy\\OraclePipeline\\TestingWorkspace" (echo \'Testing Directory Exists\') else ( mkdir "C:\\Jenkins\\Home\\workspace\\Oracle_CaseStudy\\OraclePipeline\\TestingWorkspace" && echo \'Testing Directory Created\')'
+    }
+    
+    stage('Cloning the Workspace')
+    {
+        bat 'git clone https://akhila0505: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@github.com/akhila0505/CaseStudy.git  "C:\\Jenkins\\Home\\workspace\\PLSQLDeployment\\CodeMigration\\TestingWorkspace"'
+    }
+
+    stage('Code Deployment to Testing')
+    {
+        echo 'SQLPlusRunner running user define script for HR@xe'
+        step(
+            [
+            $class: 'SQLPlusRunnerBuilder', credentialsId:'hrTestDBCred', instance:'xe', scriptType:'file', script: 'TestingWorkspace\\sf_Tax_Calc.sql', scriptContent: ''
+            ]
+        )
+    }
+    stage('End')
+    {
+        echo 'Deployment Successful'
+    }
+}
